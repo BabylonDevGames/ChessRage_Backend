@@ -6,4 +6,5 @@ import com.google.firebase.auth.FirebaseToken;
 public interface FireBaseService {
 
     FirebaseToken decodeToken(String token) throws FirebaseAuthException;
+
 }

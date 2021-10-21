@@ -4,21 +4,19 @@ import com.ibabylon.chessrage.dto.common.AssetVersionItem;
 import com.ibabylon.chessrage.dto.common.MissingAssetItem;
 import com.ibabylon.chessrage.model.AssetVersion;
 import com.ibabylon.chessrage.model.AssetVersionHistory;
-import com.ibabylon.chessrage.repository.AssetVersionHistoryRepository;
 import com.ibabylon.chessrage.repository.AssetVersionRepository;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class AssetVersionImpl implements AssetVersionService {
 
-    @Autowired
-    AssetVersionHistoryRepository assetVersionHistoryRepository;
     @Autowired
     private AssetVersionRepository assetVersionRepository;
 
@@ -27,33 +25,37 @@ public class AssetVersionImpl implements AssetVersionService {
 
         List<AssetVersion> currentAssetVersions = assetVersionRepository.findAll();
 
+        List<MissingAssetItem> result = new ArrayList<MissingAssetItem>();
+
         List<AssetVersion> missingAssets = currentAssetVersions.stream()
                 .filter(x -> assets.stream()
-                        .anyMatch(a -> a.getId().equals(x.getId()) && !a.getVersion().equals(x.getVersion())))
+                        .allMatch(a -> a.getId().equals(x.getId()) && !a.getVersion().equals(x.getVersion()))
+                        || !assets.stream().allMatch(a -> x.getId().equals(a.getId()))
+                )
                 .collect(Collectors.toList());
 
-        List<UUID> missingAssetIds = missingAssets.stream().map(x -> x.getId()).collect(Collectors.toList());
+        List<AssetVersionHistory> assetHistories = missingAssets.stream().flatMap(x -> x.getAssetVersionHistories().stream()).collect(Collectors.toList());
 
+        for (AssetVersionHistory item : assetHistories) {
+            Optional<AssetVersionItem> assetVersion = assets.stream().filter(x -> x.getId().equals(item.getAsset().getId())).findAny();
 
-        List<AssetVersionHistory> assetHistories = assetVersionHistoryRepository.getAllAssetVersionHistoriesByAssetIdS(missingAssetIds);
+            if (assetVersion.isPresent()) {
+                if (compareVersions(assetVersion.get().getVersion(), item.getVersion())) {
+                    result.add(new MissingAssetItem(item.getId(), item.getAsset().getId(), item.getVersion(), item.getSrc_link()));
+                }
+            } else {
+                result.add(new MissingAssetItem(item.getId(), item.getAsset().getId(), item.getVersion(), item.getSrc_link()));
+            }
+        }
 
-        List<MissingAssetItem> missingAssetItems = assetHistories.stream()
-                .filter(x -> missingAssets.stream().anyMatch(a -> a.getId().equals(x.getAsset().getId())
-                        && compareVersions(a.getVersion(), x.getVersion())
-                )).map(a ->
-                        new MissingAssetItem(a.getId(), a.getAsset().getId(), a.getVersion(), a.getSrc_link()))
-                .collect(Collectors.toList());
-
-
-        return missingAssetItems;
+        return result;
     }
-
 
     private Boolean compareVersions(String neededV, String currentV) {
         ComparableVersion needed = new ComparableVersion(neededV);
         ComparableVersion current = new ComparableVersion(currentV);
 
-        return current.compareTo(needed) >= 0;
+        return current.compareTo(needed) > 0;
     }
 
 }

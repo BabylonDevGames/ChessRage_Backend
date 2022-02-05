@@ -36,7 +36,6 @@ public class AssetVersionController {
 
         try {
             List<MissingAssetItem> missingAssets = assetVersionService.getMissingAssets(rq.getAssets());
-            
             res.setSuccess(true);
             res.setResult(missingAssets);
         } catch (Exception e) {

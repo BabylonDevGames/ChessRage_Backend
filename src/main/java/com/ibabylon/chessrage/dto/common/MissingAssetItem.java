@@ -23,5 +23,7 @@ public class MissingAssetItem {
     private String version;
 
     private  String src_link;
+    
+    private UUID asset_type;
 
 }

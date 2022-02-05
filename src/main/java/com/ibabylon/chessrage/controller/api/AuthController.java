@@ -41,7 +41,7 @@ public class AuthController {
 
             if (userExist) {
                 res.setSuccess(true);
-                res.setResult(token);
+                res.setResult(rq.getToken());
             } else {
                 ApiErrorMessageBuilder.buildErrorMessage(res, AuthErrorCodes.UserNotFound);
             }

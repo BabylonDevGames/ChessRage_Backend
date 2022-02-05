@@ -13,8 +13,8 @@ public class TestController {
 
     @PostMapping("/info")
     public String testUser(){
-        final FirebaseUserDetails auth =(FirebaseUserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        return auth.getId();
+       // final FirebaseUserDetails auth =(FirebaseUserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return "Works";
+        //return auth.getId();
     }
 }

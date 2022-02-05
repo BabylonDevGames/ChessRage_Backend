@@ -22,13 +22,13 @@ import java.util.UUID;
 public class SandBoxUser {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+//    @GeneratedValue(generator = "UUID")
+//    @GenericGenerator(
+//            name = "UUID",
+//            strategy = "org.hibernate.id.UUIDGenerator"
+//    )
     @Column(name = "id",updatable = false, nullable = false)
-    private UUID id;
+    private String id;
 
     @Column(name="email",length = 50,nullable = false)
     private String email;

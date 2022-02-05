@@ -11,6 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 
 
@@ -23,11 +24,12 @@ public class ChessRageApplication {
 		ClassLoader classLoader = ChessRageApplication.class.getClassLoader();
 
 		//File file = new File(Objects.requireNonNull(classLoader.getResource("serviceAccount.json")).getFile());
-		File file = new ClassPathResource("serviceAccount.json").getFile();
-		FileInputStream serviceAccount = new FileInputStream(file.getAbsolutePath());
+		//File file = new ClassPathResource("serviceAccount.json").getFile();
+		ClassPathResource serviceAccount = new ClassPathResource("serviceAccount.json");
+		//FileInputStream serviceAccount = new FileInputStream(file.);
 
 		FirebaseOptions options = new FirebaseOptions.Builder()
-				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+				.setCredentials(GoogleCredentials.fromStream(serviceAccount.getInputStream()))
 				.build();
 
 		FirebaseApp.initializeApp(options);
